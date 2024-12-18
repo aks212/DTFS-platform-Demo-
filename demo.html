@@ -1,0 +1,3353 @@
+<html><head>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/21.6.10/i18next.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/i18next-http-backend/1.3.1/i18next-http-backend.min.js"></script>
+
+<style>
+/* Enhanced modern styles */
+body {
+  --tg-theme-bg-color: #fff;
+  --tg-theme-text-color: #000;
+  --tg-theme-button-color: #2563eb;
+  --tg-theme-button-text-color: #fff;
+  background: var(--tg-theme-bg-color);
+  color: var(--tg-theme-text-color);
+}
+
+:root {
+  --primary: #2563eb;
+  --secondary: #64748b;
+  --accent: #0ea5e9;
+}
+
+.platform-logo {
+  font-family: 'Arial', sans-serif;
+  font-weight: 800;
+  font-size: 1.5rem;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.nav-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(14, 165, 233, 0.1));
+  border-radius: 6px;
+  margin-right: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.nav-item:hover .nav-icon {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: white;
+  transform: scale(1.1);
+}
+
+.nav-item.active .nav-icon {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: white;
+}
+
+.tg-button {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: var(--tg-theme-button-text-color);
+  border-radius: 12px;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tg-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.sidebar {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(180deg, var(--tg-theme-bg-color) 0%, rgba(37, 99, 235, 0.05) 100%);
+  backdrop-filter: blur(10px);
+}
+
+.nav-item {
+  transition: all 0.2s ease;
+  border-radius: 12px;
+  margin-bottom: 4px;
+}
+
+.nav-item:hover {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(14, 165, 233, 0.1));
+  transform: translateX(4px);
+}
+
+.nav-item.active {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: white;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.stat-card {
+  background: linear-gradient(135deg, var(--tg-theme-bg-color), rgba(37, 99, 235, 0.05));
+  border-radius: 16px;
+  padding: 1.75rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(37, 99, 235, 0.1);
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.12);
+}
+
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-top: 0.5rem;
+}
+
+.chart-container {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  border: 1px solid rgba(37, 99, 235, 0.1);
+  transition: all 0.3s ease;
+}
+
+.chart-container:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.12);
+}
+
+.dropdown-content {
+  display: none;
+  padding-left: 2rem;
+}
+
+.dropdown.open .dropdown-content {
+  display: block;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    position: fixed;
+    z-index: 50;
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .main-content {
+    margin-left: 0;
+  }
+}
+
+.modal-backdrop {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.modal-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  max-width: 90%;
+  width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  z-index: 1001;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+/* Dark mode styles */
+body.dark-mode {
+  --tg-theme-bg-color: #1a1a1a;
+  --tg-theme-text-color: #ffffff;
+  --tg-theme-button-color: #3b82f6;
+  --tg-theme-button-text-color: #ffffff;
+  color-scheme: dark;
+}
+
+body.dark-mode .bg-white {
+  background-color: #2d2d2d;
+  color: #ffffff;
+}
+
+body.dark-mode .text-gray-600 {
+  color: #d1d5db;
+}
+
+body.dark-mode .bg-gray-50 {
+  background-color: #3d3d3d;
+}
+
+body.dark-mode .border {
+  border-color: #404040;
+}
+
+/* Notification styles */
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notifications-panel {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  width: 300px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  display: none;
+}
+
+body.dark-mode .notifications-panel {
+  background: #2d2d2d;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+</style>
+</head>
+<body>
+<div class="flex min-h-screen">
+  <!-- Sidebar -->
+  <aside class="sidebar w-64 shadow-lg fixed h-full">
+    <div class="p-4 border-b">
+      <div class="platform-logo">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 2L4 8V24L16 30L28 24V8L16 2Z" stroke="url(#logo-gradient)" stroke-width="2"/>
+          <path d="M16 8L8 12V20L16 24L24 20V12L16 8Z" fill="url(#logo-gradient)"/>
+          <defs>
+            <linearGradient id="logo-gradient" x1="4" y1="2" x2="28" y2="30" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#2563eb"/>
+              <stop offset="1" stop-color="#0ea5e9"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <span>DTFS (Demo)</span>
+      </div>
+    </div>
+    
+    <nav class="p-4">
+      <div class="space-y-2">
+        <a href="#Home" class="nav-item active flex items-center p-3 rounded-lg">
+          <div class="nav-icon">
+            <i class="fas fa-home"></i>
+          </div>
+          <span data-i18n="home">Home</span>
+        </a>
+        
+        <div class="dropdown">
+          <a href="#trade" class="nav-item flex items-center justify-between p-3 rounded-lg">
+            <div class="flex items-center">
+              <div class="nav-icon">
+                <i class="fas fa-handshake"></i>
+              </div>
+              <span data-i18n="trade">Trade Management</span>
+            </div>
+            <i class="fas fa-chevron-down"></i>
+          </a>
+          <div class="dropdown-content">
+            <a href="#trade/request" class="nav-item flex items-center p-2 rounded-lg">
+              <div class="nav-icon">
+                <i class="fas fa-file-invoice"></i>
+              </div>
+              <span>Trade Request</span>
+            </a>
+            <a href="#trade/chat" class="nav-item flex items-center p-2 rounded-lg">
+              <div class="nav-icon">
+                <i class="fas fa-comments"></i>
+              </div>
+              <span>Trade Chat</span>
+            </a>
+            <a href="#trade/notifications" class="nav-item flex items-center p-2 rounded-lg">
+              <div class="nav-icon">
+                <i class="fas fa-inbox"></i>
+              </div>
+              <span data-i18n="notifications">Trade Inbox</span>
+            </a>
+            <a href="#trade/connections" class="nav-item flex items-center p-2 rounded-lg">
+              <div class="nav-icon">
+                <i class="fas fa-network-wired"></i>
+              </div>
+              <span data-i18n="connections">Trade Connections</span>
+            </a>
+          </div>
+        </div>
+        
+        <a href="#finance" class="nav-item flex items-center p-3 rounded-lg">
+          <div class="nav-icon">
+            <i class="fas fa-money-check-dollar"></i>
+          </div>
+          <span>Trade Finance</span>
+        </a>
+        
+        <div class="dropdown">
+          <a href="#staking" class="nav-item flex items-center justify-between p-3 rounded-lg">
+            <div class="flex items-center">
+              <div class="nav-icon">
+                <i class="fas fa-layer-group"></i>
+              </div>
+              <span data-i18n="staking">Staking Pool</span>
+            </div>
+            <i class="fas fa-chevron-down"></i>
+          </a>
+          <div class="dropdown-content">
+            <a href="#staking/pools" class="nav-item flex items-center p-2 rounded-lg">
+              <div class="nav-icon">
+                <i class="fas fa-coins"></i>
+              </div>
+              <span>Staking Pools</span>
+            </a>
+            <a href="#staking/rewards" class="nav-item flex items-center p-2 rounded-lg">
+              <div class="nav-icon">
+                <i class="fas fa-gift"></i>
+              </div>
+              <span>Rewards</span>
+            </a>
+            <a href="#staking/history" class="nav-item flex items-center p-2 rounded-lg">
+              <div class="nav-icon">
+                <i class="fas fa-history"></i>
+              </div>
+              <span>History</span>
+            </a>
+          </div>
+        </div>
+        
+        <a href="#wallet" class="nav-item flex items-center p-3 rounded-lg">
+          <div class="nav-icon">
+            <i class="fas fa-wallet"></i>
+          </div>
+          <span data-i18n="wallet">Wallet</span>
+        </a>
+
+        <div class="dropdown">
+          <a href="#tradehub" class="nav-item flex items-center justify-between p-3 rounded-lg">
+            <div class="flex items-center">
+              <div class="nav-icon">
+                <i class="fas fa-store"></i>
+              </div>
+              <span>Trade Hub</span>
+            </div>
+            <i class="fas fa-chevron-down"></i>
+          </a>
+          <div class="dropdown-content">
+            <a href="#tradehub/marketplace" class="nav-item flex items-center p-2 rounded-lg">
+              <div class="nav-icon">
+                <i class="fas fa-shopping-cart"></i>
+              </div>
+              <span>Marketplace</span>
+            </a>
+            <a href="#tradehub/products" class="nav-item flex items-center p-2 rounded-lg">
+              <div class="nav-icon">
+                <i class="fas fa-box"></i>
+              </div>
+              <span>Products</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="dropdown">
+          <a href="#account" class="nav-item flex items-center justify-between p-3 rounded-lg">
+            <div class="flex items-center">
+              <div class="nav-icon">
+                <i class="fas fa-user-circle"></i>
+              </div>
+              <span>Account</span>
+            </div>
+            <i class="fas fa-chevron-down"></i>
+          </a>
+          <div class="dropdown-content">
+            <a href="#account/profile" class="nav-item flex items-center p-2 rounded-lg">
+              <div class="nav-icon">
+                <i class="fas fa-id-card"></i>
+              </div>
+              <span>Profile</span>
+            </a>
+            <a href="#account/settings" class="nav-item flex items-center p-2 rounded-lg">
+              <div class="nav-icon">
+                <i class="fas fa-cog"></i>
+              </div>
+              <span>Settings</span>
+            </a>
+            <a href="#account/notifications" class="nav-item flex items-center p-2 rounded-lg">
+              <div class="nav-icon">
+                <i class="fas fa-bell"></i>
+              </div>
+              <span>Notifications</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-6 ml-64 main-content">
+    <div class="mb-8">
+      <h2 class="text-2xl font-bold" data-i18n="home">Home</h2>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="dashboard-grid">
+      <div class="stat-card">
+        <div class="flex justify-between items-center">
+          <h3 class="text-gray-600" data-i18n="Total Trade Volume">Total Trade Volume</h3>
+          <i class="fas fa-chart-line text-primary"></i>  
+        </div>
+        <p class="stat-value">$750,000</p>
+      </div>
+
+      <div class="stat-card">
+        <div class="flex justify-between items-center">
+          <h3 class="text-gray-600" data-i18n="Total Staked Assets">Total Staked Assets</h3>
+          <i class="fas fa-layer-group text-primary"></i>
+        </div>
+        <p class="stat-value">$12,791,860</p>
+      </div>
+
+      <div class="stat-card">
+        <div class="flex justify-between items-center">
+          <h3 class="text-gray-600" data-i18n="Active Trades">Active Trades</h3>
+          <i class="fas fa-exchange-alt text-primary"></i>
+        </div>
+        <p class="stat-value">46</p>
+      </div>
+
+      <div class="stat-card">
+        <div class="flex justify-between items-center">
+          <h3 class="text-gray-600" data-i18n="Average APY">Average APY</h3>
+          <i class="fas fa-percentage text-primary"></i>
+        </div>
+        <p class="stat-value">9.8%</p>
+      </div>
+    </div>
+
+    <!-- Progress & Performance -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <!-- Progress & Badges -->
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-lg font-semibold" data-i18n="Progress And Achievements">Progress & Achievements</h3>
+          <div class="flex gap-2">
+            <span class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm">Level 3</span>
+            <span class="px-3 py-1 bg-green-100 text-green-600 rounded-full text-sm">Verified</span>
+          </div>
+        </div>
+
+        <!-- Trading Progress -->
+        <div class="mb-6">
+          <div class="flex justify-between items-center mb-2">
+            <span data-i18n="Trading Progress">Trading Progress</span>
+            <span class="text-sm font-semibold">75%</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-blue-500 rounded-full h-2" style="width: 75%"></div>
+          </div>
+          <p class="text-sm text-gray-500 mt-1">$750,000 / $1,000,000 Monthly Goal</p>
+        </div>
+
+        <!-- Staking Progress -->
+        <div class="mb-6">
+          <div class="flex justify-between items-center mb-2">
+            <span data-i18n="Staking Progress">Staking Progress</span>
+            <span class="text-sm font-semibold">60%</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-green-500 rounded-full h-2" style="width: 60%"></div>
+          </div>
+          <p class="text-sm text-gray-500 mt-1">12,791 DTFS / 20,000 DTFS Goal</p>
+        </div>
+
+        <!-- Badges -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="text-center">
+            <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-2">
+              <i class="fas fa-award text-blue-500"></i>
+            </div>
+            <span class="text-sm">Top Trader</span>
+          </div>
+          <div class="text-center">
+            <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mx-auto mb-2">
+              <i class="fas fa-shield-alt text-purple-500"></i>
+            </div>
+            <span class="text-sm">KYC Verified</span>
+          </div>
+          <div class="text-center">
+            <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-2">
+              <i class="fas fa-user-tie text-green-500"></i>
+            </div>
+            <span class="text-sm">Premium</span>
+          </div>
+          <div class="text-center">
+            <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center mx-auto mb-2">
+              <i class="fas fa-star text-yellow-500"></i>
+            </div>
+            <span class="text-sm">5.0 Rating</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Performance Metrics -->
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <h3 class="text-lg font-semibold mb-6" data-i18n="performanceMetrics">Performance Metrics</h3>
+        
+        <div class="grid grid-cols-2 gap-6 mb-6">
+          <div>
+            <p class="text-gray-600 mb-1" data-i18n="successRate">Success Rate</p>
+            <div class="flex items-center">
+              <span class="text-2xl font-bold mr-2">92%</span>
+              <span class="text-green-500 text-sm">
+                <i class="fas fa-arrow-up mr-1"></i>
+                2.5%
+              </span>
+            </div>
+          </div>
+          <div>
+            <p class="text-gray-600 mb-1" data-i18n="avgProcessingTime">Avg. Processing Time</p>
+            <div class="flex items-center">
+              <span class="text-2xl font-bold mr-2">2.3d</span>
+              <span class="text-green-500 text-sm">
+                <i class="fas fa-arrow-down mr-1"></i>
+                0.5d
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Performance Chart -->
+        <canvas id="performanceChart" class="w-full h-48 mb-4" width="303" height="151" style="display: block; box-sizing: border-box; height: 151px; width: 303px;"></canvas>
+        <!-- Accessible Finance -->
+        <div class="border-t pt-4">
+          <h4 class="font-semibold mb-4" data-i18n="Accessible Finance">Accessible Finance</h4>
+          <div class="space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="text-gray-600" data-i18n="Trade Finance Limit">Trade Finance Limit</span>
+              <div class="text-right">
+                <span class="font-semibold block">$2,000,000</span>
+                <span class="text-sm text-green-500">Available</span>
+              </div>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-gray-600" data-i18n="currentUtilization">Current Utilization</span>
+              <div class="text-right">
+                <span class="font-semibold block">$750,000</span>
+                <span class="text-sm text-gray-500">37.5% Used</span>
+              </div>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div class="bg-blue-500 rounded-full h-2" style="width: 37.5%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-end mb-4">
+      <button onclick="connectWallet()" class="wallet-connect-btn tg-button" data-i18n="connect">
+        <div class="flex items-center gap-2">
+          <i class="fas fa-wallet"></i>
+          <span data-i18n="connect">Connect Wallet</span>
+        </div>
+      </button>
+    </div>
+    
+  </main>
+</div>
+
+<!-- Charts Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div class="bg-white p-6 rounded-lg shadow chart-container">
+        <h3 class="text-lg font-semibold mb-4">Trade Volume Trend</h3>
+        <canvas id="tradeVolumeChart"></canvas>
+      </div>
+      
+      <div class="bg-white p-6 rounded-lg shadow chart-container">
+        <h3 class="text-lg font-semibold mb-4">Staking Distribution</h3>
+        <canvas id="stakingChart"></canvas>
+      </div>
+    </div>
+    
+    <div class="flex justify-end mb-4">
+      <button onclick="connectWallet()" class="wallet-connect-btn tg-button">
+        <div class="flex items-center gap-2">
+          <i class="fas fa-wallet"></i>
+          <span>Connect Wallet</span>
+        </div>
+      </button>
+    </div>
+    
+  </main>
+</div>
+
+<script>
+// Initialize Telegram WebApp
+const webapp = window.Telegram.WebApp;
+webapp.ready();
+
+// Setup dark mode based on Telegram theme
+if (webapp.colorScheme === 'dark') {
+  document.body.classList.add('dark');
+}
+
+// Add demo mode flag and initialization
+let isDemoMode = true;
+
+function initializeDemoMode() {
+  // Disable actual interactions and show demo overlays
+  const demoOverlay = document.createElement('div');
+  demoOverlay.id = 'demo-overlay';
+  demoOverlay.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: white;
+    text-align: center;
+    padding: 20px;
+  `;
+  
+  demoOverlay.innerHTML = `
+    <div class="bg-white p-8 rounded-lg shadow-xl text-center max-w-md">
+      <h2 class="text-3xl font-bold mb-4 text-blue-600">DTFS Demo Version</h2>
+      <p class="text-gray-700 mb-6">
+        Welcome to the DTFS Platform Demo. This is a simulated environment 
+        to showcase platform features. Real transactions are disabled.
+      </p>
+      <div class="space-y-4">
+        <button id="enterDemoBtn" class="tg-button w-full">
+          Enter Demo Mode
+        </button>
+        <p class="text-sm text-gray-500">
+          Note: All interactions are simulated and no real transactions will be processed.
+        </p>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(demoOverlay);
+
+  // Add event listener to enter demo mode
+  document.getElementById('enterDemoBtn').addEventListener('click', () => {
+    demoOverlay.style.display = 'none';
+    showDemoWelcomeModal();
+  });
+}
+
+function showDemoWelcomeModal() {
+  const modalBackdrop = document.createElement('div');
+  modalBackdrop.className = 'modal-backdrop';
+  modalBackdrop.innerHTML = `
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="text-xl font-semibold">Welcome to DTFS Demo</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="p-6">
+        <h4 class="text-lg font-semibold mb-4">Demo Account Details</h4>
+        <div class="space-y-3">
+          <div>
+            <p class="font-semibold">Username:</p>
+            <p class="text-gray-600">demo_trader</p>
+          </div>
+          <div>
+            <p class="font-semibold">Account Type:</p>
+            <p class="text-gray-600">Premium Demo Account</p>
+          </div>
+          <div>
+            <p class="font-semibold">Demo Balance:</p>
+            <p class="text-green-600">$100,000 (Simulated)</p>
+          </div>
+        </div>
+        <div class="mt-6 text-center">
+          <p class="text-sm text-gray-500">
+            Explore platform features freely. No real financial transactions will be processed.
+          </p>
+        </div>
+      </div>
+      <div class="p-4 border-t flex justify-end">
+        <button class="tg-button" id="startDemoBtn">Start Exploring</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modalBackdrop);
+
+  // Close modal events
+  const closeBtn = modalBackdrop.querySelector('.modal-close');
+  const startBtn = modalBackdrop.querySelector('#startDemoBtn');
+
+  [closeBtn, startBtn].forEach(el => {
+    el.addEventListener('click', () => {
+      document.body.removeChild(modalBackdrop);
+    });
+  });
+}
+
+// Modify existing functions to show demo limitations
+function showDemoLimitationModal(feature) {
+  const modalBackdrop = document.createElement('div');
+  modalBackdrop.className = 'modal-backdrop';
+  modalBackdrop.innerHTML = `
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="text-xl font-semibold">Demo Limitation</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="p-6 text-center">
+        <div class="mb-6">
+          <i class="fas fa-lock text-4xl text-yellow-500 mb-4"></i>
+          <h4 class="text-lg font-semibold">Feature Limited in Demo Mode</h4>
+        </div>
+        <p class="text-gray-600 mb-4">
+          The ${feature} feature is restricted in the demo version. 
+          Upgrade to a full account to unlock complete functionality.
+        </p>
+        <button class="tg-button">Upgrade Account</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modalBackdrop);
+
+  // Close modal events
+  const closeBtn = modalBackdrop.querySelector('.modal-close');
+  closeBtn.addEventListener('click', () => {
+    document.body.removeChild(modalBackdrop);
+  });
+}
+
+// Modify existing scripts to add demo mode checks
+document.addEventListener('DOMContentLoaded', () => {
+  initializeDemoMode();
+
+  // Add demo mode checks to interactive elements
+  const interactiveElements = document.querySelectorAll('button, a[href^="#"]');
+  interactiveElements.forEach(el => {
+    el.addEventListener('click', (e) => {
+      if (isDemoMode) {
+        const feature = el.textContent || el.getAttribute('href');
+        showDemoLimitationModal(feature);
+        e.preventDefault();
+      }
+    });
+  });
+});
+
+// Initialize i18next
+const translations = {
+  en: {
+    home: 'Home', // Changed from dashboard to home
+    wallet: 'Wallet',
+    staking: 'Staking Pool',
+    trade: 'Trade Management',
+    notifications: 'Notifications',
+    darkMode: 'Dark Mode',
+    language: 'Language',
+    totalBalance: 'Total Balance',
+    connect: 'Connect',
+    tradingProgress: 'Trading Progress',
+    stakingProgress: 'Staking Progress',
+    connections: 'Trade Connections',
+    marketplace: 'Marketplace',
+    products: 'Products',
+    profile: 'Profile',
+    settings: 'Settings',
+    tradeRequests: 'Trade Requests',
+    tradeChat: 'Trade Chat',
+    tradeNotifications: 'Trade Notifications'
+  },
+  es: {
+    home: 'Inicio', // Changed from dashboard to home
+    wallet: 'Billetera',
+    staking: 'Grupo de Staking',
+    trade: 'Gestión Comercial',
+    notifications: 'Notificaciones',
+    darkMode: 'Modo Oscuro',
+    language: 'Idioma',
+    totalBalance: 'Balance Total',
+    connect: 'Conectar',
+    tradingProgress: 'Progreso de Trading',
+    stakingProgress: 'Progreso de Staking',
+    connections: 'Conexiones Comerciales',
+    marketplace: 'Mercado',
+    products: 'Productos',
+    profile: 'Perfil',
+    settings: 'Configuraciones',
+    tradeRequests: 'Solicitudes de Comercio',
+    tradeChat: 'Chat de Comercio',
+    tradeNotifications: 'Notificaciones de Comercio'
+  },
+  zh: {
+    home: '首页', // Changed from dashboard to home
+    wallet: '钱包',
+    staking: '质押池',
+    trade: '交易管理',
+    notifications: '通知',
+    darkMode: '深色模式',
+    language: '语言',
+    totalBalance: '总余额',
+    connect: '连接',
+    tradingProgress: '交易进度',
+    stakingProgress: '质押进度',
+    connections: '贸易连接',
+    marketplace: '市场',
+    products: '产品',
+    profile: '个人资料',
+    settings: '设置',
+    tradeRequests: '交易请求',
+    tradeChat: '交易聊天',
+    tradeNotifications: '交易通知'
+  }
+};
+
+// Initialize i18next
+i18next.init({
+  lng: 'en',
+  resources: {
+    en: { translation: translations.en },
+    es: { translation: translations.es },
+    zh: { translation: translations.zh }
+  }
+});
+
+// Add utility bar to all pages
+function addUtilityBar() {
+  const utilityBar = document.createElement('div');
+  utilityBar.className = 'fixed top-0 right-0 p-4 flex items-center gap-4 z-50';
+  utilityBar.innerHTML = `
+    <div class="flex items-center gap-4">
+      <select id="languageSelect" class="rounded-lg px-2 py-1 border">
+        <option value="en">English</option>
+        <option value="es">Español</option>
+        <option value="zh">中文</option>
+      </select>
+      
+      <button id="darkModeToggle" class="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+        <i class="fas fa-moon"></i>
+      </button>
+      
+      <button id="notificationToggle" class="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+        <i class="fas fa-bell"></i>
+        <span class="notification-badge">3</span>
+      </button>
+    </div>
+    
+    <div id="notificationsPanel" class="notifications-panel">
+      <div class="p-4 border-b">
+        <h3 class="font-semibold" data-i18n="notifications">Notifications</h3>
+      </div>
+      <div class="p-4 space-y-4">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+            <i class="fas fa-exchange-alt text-blue-500"></i>
+          </div>
+          <div>
+            <p class="font-semibold">New Trade Request</p>
+            <p class="text-sm text-gray-500">Global Imports Co. sent a trade request</p>
+            <span class="text-xs text-gray-400">2 minutes ago</span>
+          </div>
+        </div>
+        <!-- Add more notification items as needed -->
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(utilityBar);
+  
+  // Event Listeners
+  const languageSelect = document.getElementById('languageSelect');
+  const darkModeToggle = document.getElementById('darkModeToggle');
+  const notificationToggle = document.getElementById('notificationToggle');
+  const notificationsPanel = document.getElementById('notificationsPanel');
+  
+  // Language Change
+  languageSelect.addEventListener('change', (e) => {
+    i18next.changeLanguage(e.target.value).then(() => {
+      updatePageContent();
+    });
+  });
+  
+  // Dark Mode Toggle
+  darkModeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+    localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    updateDarkModeIcon();
+  });
+  
+  // Notifications Toggle
+  notificationToggle.addEventListener('click', () => {
+    notificationsPanel.style.display = 
+      notificationsPanel.style.display === 'block' ? 'none' : 'block';
+  });
+  
+  // Close notifications panel when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!notificationsPanel.contains(e.target) && 
+        !notificationToggle.contains(e.target)) {
+      notificationsPanel.style.display = 'none';
+    }
+  });
+}
+
+// Update page content based on selected language
+function updatePageContent() {
+  document.querySelectorAll('[data-i18n]').forEach(element => {
+    const key = element.getAttribute('data-i18n');
+    element.textContent = i18next.t(key);
+  });
+}
+
+// Update dark mode icon
+function updateDarkModeIcon() {
+  const icon = document.querySelector('#darkModeToggle i');
+  if (document.body.classList.contains('dark-mode')) {
+    icon.classList.remove('fa-moon');
+    icon.classList.add('fa-sun');
+  } else {
+    icon.classList.remove('fa-sun');
+    icon.classList.add('fa-moon');
+  }
+}
+
+// Initialize dark mode from localStorage
+function initializeDarkMode() {
+  if (localStorage.getItem('darkMode') === 'true') {
+    document.body.classList.add('dark-mode');
+    updateDarkModeIcon();
+  }
+}
+
+// Call these functions when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+  addUtilityBar();
+  initializeDarkMode();
+  updatePageContent();
+});
+
+// Initialize dropdowns
+document.querySelectorAll('.dropdown').forEach(dropdown => {
+  const trigger = dropdown.querySelector('.nav-item');
+  trigger.addEventListener('click', (e) => {
+    e.preventDefault();
+    dropdown.classList.toggle('open');
+    const chevron = trigger.querySelector('.fa-chevron-down');
+    chevron.style.transform = dropdown.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0)';
+  });
+});
+
+// Add navigation handler for staking pages
+document.querySelectorAll('a[href="#staking/pools"], a[href="#staking/rewards"], a[href="#staking/history"]').forEach(link => {
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    const page = e.target.closest('a').getAttribute('href').split('/')[1];
+    switch(page) {
+      case 'pools':
+        showStakingPoolsPage();
+        break;
+      case 'rewards':
+        showStakingRewardsPage();
+        break;
+      case 'history':
+        showStakingHistoryPage();
+        break;
+    }
+  });
+});
+
+// Add wallet navigation handler
+document.querySelector('a[href="#wallet"]').addEventListener('click', (e) => {
+  e.preventDefault();
+  showWalletPage();
+});
+
+// Add navigation handlers for marketplace and products pages
+document.querySelectorAll('a[href="#tradehub/marketplace"], a[href="#tradehub/products"]').forEach(link => {
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    const page = e.target.closest('a').getAttribute('href').split('/')[1];
+    if (page === 'marketplace') {
+      showMarketplacePage();
+    } else if (page === 'products') {
+      showProductsPage(); 
+    }
+  });
+});
+
+// Add new navigation handlers for trade pages
+document.querySelectorAll('a[href="#trade/chat"], a[href="#trade/request"], a[href="#trade/notifications"]').forEach(link => {
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    const page = e.target.closest('a').getAttribute('href').split('/')[1];
+    switch(page) {
+      case 'chat':
+        showTradeChatPage();
+        break;
+      case 'request':
+        showTradeRequestPage();
+        break;
+      case 'notifications':
+        showTradeNotificationsPage();
+        break;
+    }
+  });
+});
+
+// Add new navigation handlers for connections and finance pages
+document.querySelector('a[href="#trade/connections"]').addEventListener('click', (e) => {
+  e.preventDefault();
+  showTradeConnectionsPage();
+});
+
+document.querySelector('a[href="#finance"]').addEventListener('click', (e) => {
+  e.preventDefault();
+  showTradeFinancePage();
+});
+
+// Add new page functions
+function showTradeConnectionsPage() {
+  const mainContent = document.querySelector('.main-content');
+  mainContent.innerHTML = `
+    <div class="mb-8">
+      <h2 class="text-2xl font-bold">Trade Connections</h2>
+      <p class="text-gray-600 mt-2">Manage your trading partners and network</p>
+    </div>
+
+    <!-- Connection Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="stat-card">
+        <h3 class="text-gray-600">Active Connections</h3>
+        <p class="stat-value">24</p>
+      </div>
+      <div class="stat-card">
+        <h3 class="text-gray-600">Pending Requests</h3>
+        <p class="stat-value">5</p>
+      </div>
+      <div class="stat-card">
+        <h3 class="text-gray-600">Total Trading Volume</h3>
+        <p class="stat-value">$2.4M</p>
+      </div>
+    </div>
+
+    <!-- Connection Actions -->
+    <div class="flex gap-4 mb-8">
+      <button class="tg-button">
+        <i class="fas fa-user-plus mr-2"></i>Invite Partner
+      </button>
+      <button class="tg-button">
+        <i class="fas fa-plus mr-2"></i>Add Connection
+      </button>
+    </div>
+
+    <!-- Connection Lists -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Active Connections -->
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <h3 class="text-lg font-semibold mb-6">Active Connections</h3>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between p-4 border rounded-lg">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-building text-blue-500"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold">Global Imports Co.</h4>
+                <p class="text-sm text-gray-500">Trading since Jan 2023</p>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <button class="tg-button">View Details</button>
+              <button class="tg-button" style="background: #ef4444">Remove</button>
+            </div>
+          </div>
+          <!-- Add more active connections here -->
+        </div>
+      </div>
+
+      <!-- Pending Requests -->
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <h3 class="text-lg font-semibold mb-6">Pending Requests</h3>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between p-4 border rounded-lg">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-building text-yellow-500"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold">Maritime Traders Inc.</h4>
+                <p class="text-sm text-gray-500">Request received 2 days ago</p>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <button class="tg-button">Review Request</button>
+              <button class="tg-button" style="background: #ef4444">Decline</button>
+            </div>
+          </div>
+          <!-- Add more pending requests here -->
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+
+function showStakingPoolsPage() {
+  const mainContent = document.querySelector('.main-content');
+  mainContent.innerHTML = `
+    <div class="mb-8">
+      <h2 class="text-2xl font-bold">Staking Pools</h2>
+      <p class="text-gray-600 mt-2">Stake your assets and earn rewards</p>
+    </div>
+
+    <div class="flex justify-end mb-4">
+      <button onclick="connectWallet()" class="wallet-connect-btn tg-button">
+        <div class="flex items-center gap-2">
+          <i class="fas fa-wallet"></i>
+          <span>Connect Wallet</span>
+        </div>
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- DTFS Pool -->
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <div class="flex justify-between items-center mb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+              <i class="fas fa-coins text-blue-500"></i>
+            </div>
+            <h3 class="text-lg font-semibold">DTFS Pool</h3>
+          </div>
+          <span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm">Active</span>
+        </div>
+        <div class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-gray-500">APY</p>
+              <p class="text-2xl font-bold">12.5%</p>
+            </div>
+            <div>
+              <p class="text-gray-500">Total Staked</p>
+              <p class="text-2xl font-bold">5.2M DTFS</p>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <p class="text-gray-500">Your Stake</p>
+            <div class="flex items-center gap-2">
+              <input type="number" class="flex-1 rounded-lg border border-gray-300 p-3" placeholder="Enter amount">
+              <button class="stake-btn tg-button opacity-50 cursor-not-allowed" disabled>Stake</button>
+            </div>
+            <p class="text-sm text-gray-500">Lock Period: 30 days</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- PADC Pool -->
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <div class="flex justify-between items-center mb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+              <i class="fas fa-coins text-purple-500"></i>
+            </div>
+            <h3 class="text-lg font-semibold">PADC Pool</h3>
+          </div>
+          <span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm">Active</span>
+        </div>
+        <div class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-gray-500">APY</p>
+              <p class="text-2xl font-bold">10.8%</p>
+            </div>
+            <div>
+              <p class="text-gray-500">Total Staked</p>
+              <p class="text-2xl font-bold">2.8M PADC</p>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <p class="text-gray-500">Your Stake</p>
+            <div class="flex items-center gap-2">
+              <input type="number" class="flex-1 rounded-lg border border-gray-300 p-3" placeholder="Enter amount">
+              <button class="stake-btn tg-button opacity-50 cursor-not-allowed" disabled>Stake</button>
+            </div>
+            <p class="text-sm text-gray-500">Lock Period: 60 days</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- USDC Pool -->
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <div class="flex justify-between items-center mb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+              <i class="fas fa-dollar-sign text-blue-500"></i>
+            </div>
+            <h3 class="text-lg font-semibold">USDC Pool</h3>
+          </div>
+          <span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm">Active</span>
+        </div>
+        <div class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-gray-500">APY</p>
+              <p class="text-2xl font-bold">8.2%</p>
+            </div>
+            <div>
+              <p class="text-gray-500">Total Staked</p>
+              <p class="text-2xl font-bold">1.5M USDC</p>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <p class="text-gray-500">Your Stake</p>
+            <div class="flex items-center gap-2">
+              <input type="number" class="flex-1 rounded-lg border border-gray-300 p-3" placeholder="Enter amount">
+              <button class="stake-btn tg-button opacity-50 cursor-not-allowed" disabled>Stake</button>
+            </div>
+            <p class="text-sm text-gray-500">Lock Period: 90 days</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- USDT Pool -->
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <div class="flex justify-between items-center mb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+              <i class="fas fa-dollar-sign text-green-500"></i>
+            </div>
+            <h3 class="text-lg font-semibold">USDT Pool</h3>
+          </div>
+          <span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm">Active</span>
+        </div>
+        <div class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-gray-500">APY</p>
+              <p class="text-2xl font-bold">7.9%</p>
+            </div>
+            <div>
+              <p class="text-gray-500">Total Staked</p>
+              <p class="text-2xl font-bold">2.1M USDT</p>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <p class="text-gray-500">Your Stake</p>
+            <div class="flex items-center gap-2">
+              <input type="number" class="flex-1 rounded-lg border border-gray-300 p-3" placeholder="Enter amount">
+              <button class="stake-btn tg-button opacity-50 cursor-not-allowed" disabled>Stake</button>
+            </div>
+            <p class="text-sm text-gray-500">Lock Period: 90 days</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function showStakingRewardsPage() {
+  const mainContent = document.querySelector('.main-content');
+  mainContent.innerHTML = `
+    <div class="mb-8">
+      <h2 class="text-2xl font-bold">Staking Rewards</h2>
+      <p class="text-gray-600 mt-2">View and claim your staking rewards</p>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <h3 class="text-gray-600 mb-2">Total Rewards Earned</h3>
+        <p class="text-2xl font-bold">$12,450.32</p>
+        <p class="text-sm text-gray-500 mt-1">+$245.80 today</p>
+      </div>
+      
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <h3 class="text-gray-600 mb-2">Claimable Rewards</h3>
+        <p class="text-2xl font-bold">$1,890.65</p>
+        <button class="tg-button mt-2">Claim All</button>
+      </div>
+      
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <h3 class="text-gray-600 mb-2">Average APY</h3>
+        <p class="text-2xl font-bold">9.8%</p>
+        <p class="text-sm text-gray-500 mt-1">Across all pools</p>
+      </div>
+    </div>
+
+    <!-- Active Rewards -->
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+      <h3 class="text-lg font-semibold mb-4">Active Rewards</h3>
+      <div class="space-y-4">
+        <!-- DTFS Rewards -->
+        <div class="border-b pb-4">
+          <div class="flex justify-between items-center mb-2">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                <i class="fas fa-coins text-blue-500"></i>
+              </div>
+              <h4 class="font-semibold">DTFS Rewards</h4>
+            </div>
+            <button class="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100">Claim</button>
+          </div>
+          <div class="grid grid-cols-3 gap-4">
+            <div>
+              <p class="text-gray-500">Earned</p>
+              <p class="font-semibold">458.32 DTFS</p>
+            </div>
+            <div>
+              <p class="text-gray-500">USD Value</p>
+              <p class="font-semibold">$825.60</p>
+            </div>
+            <div>
+              <p class="text-gray-500">APY</p>
+              <p class="font-semibold">12.5%</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Other token rewards similar structure -->
+      </div>
+    </div>
+
+    <!-- Referral Rewards -->
+    <div class="bg-white rounded-lg shadow-lg p-6">
+      <h3 class="text-lg font-semibold mb-4">Referral Rewards</h3>
+      <div class="mb-4">
+        <p class="text-gray-600">Your Referral Link</p>
+        <div class="flex items-center gap-2 mt-2">
+          <input type="text" value="https://dtfs.com/ref/abc123" class="flex-1 rounded-lg border border-gray-300 p-3" readonly>
+          <button class="tg-button">Copy</button>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <p class="text-gray-500">Total Referrals</p>
+          <p class="text-2xl font-bold">24</p>
+        </div>
+        <div>
+          <p class="text-gray-500">Active Referrals</p>
+          <p class="text-2xl font-bold">18</p>
+        </div>
+        <div>
+          <p class="text-gray-500">Referral Earnings</p>
+          <p class="text-2xl font-bold">$1,245.80</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function showStakingHistoryPage() {
+  const mainContent = document.querySelector('.main-content');
+  mainContent.innerHTML = `
+    <div class="mb-8">
+      <h2 class="text-2xl font-bold">Staking History</h2>
+      <p class="text-gray-600 mt-2">View your staking and rewards history</p>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+      <div class="flex flex-wrap gap-4">
+        <select class="rounded-lg border border-gray-300 p-2">
+          <option value="all">All Tokens</option>
+          <option value="dtfs">DTFS</option>
+          <option value="padc">PADC</option>
+          <option value="usdc">USDC</option>
+          <option value="usdt">USDT</option>
+        </select>
+        
+        <select class="rounded-lg border border-gray-300 p-2">
+          <option value="all">All Actions</option>
+          <option value="stake">Stake</option>
+          <option value="unstake">Unstake</option>
+          <option value="claim">Claim Rewards</option>
+        </select>
+        
+        <input type="date" class="rounded-lg border border-gray-300 p-2">
+        <button class="tg-button">Apply Filters</button>
+      </div>
+    </div>
+
+    <!-- History Table -->
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+      <table class="min-w-full">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Token</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Value (USD)</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr>
+            <td class="px-6 py-4">2023-06-15 14:30</td>
+            <td class="px-6 py-4">
+              <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">Stake</span>
+            </td>
+            <td class="px-6 py-4">DTFS</td>
+            <td class="px-6 py-4">1,000 DTFS</td>
+            <td class="px-6 py-4">$1,800.00</td>
+            <td class="px-6 py-4">
+              <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">Completed</span>
+            </td>
+          </tr>
+          <!-- Add more history rows -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="flex justify-between items-center mt-4">
+      <div class="text-gray-500">
+        Showing 1-10 of 24 entries
+      </div>
+      <div class="flex gap-2">
+        <button class="px-4 py-2 border rounded-lg hover:bg-gray-50">Previous</button>
+        <button class="px-4 py-2 bg-blue-500 text-white rounded-lg">1</button>
+        <button class="px-4 py-2 border rounded-lg hover:bg-gray-50">2</button>
+        <button class="px-4 py-2 border rounded-lg hover:bg-gray-50">3</button>
+        <button class="px-4 py-2 border rounded-lg hover:bg-gray-50">Next</button>
+      </div>
+    </div>
+  `;
+}
+
+// New wallet page function
+// Function to display the wallet page
+function showWalletPage() {
+  const mainContent = document.querySelector('.main-content');
+  mainContent.innerHTML = `
+    <div class="mb-8">
+      <h2 class="text-2xl font-bold">Wallet</h2>
+      <p class="text-gray-600 mt-2">Manage your assets and trade finance</p>
+    </div>
+
+    <!-- Asset Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <h3 class="text-gray-600 mb-2">Total Balance</h3>
+        <p class="text-3xl font-bold">$14,532.80</p>
+        <div class="flex items-center mt-2 text-green-500">
+          <i class="fas fa-arrow-up mr-1"></i>
+          <span>+2.4%</span>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <h3 class="text-gray-600 mb-2">Trade Finance Balance</h3>
+        <p class="text-3xl font-bold">$5,250.00</p>
+        <div class="mt-2">
+          <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-sm">2 Active Loans</span>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <h3 class="text-gray-600 mb-2">Staking Balance</h3>
+        <p class="text-3xl font-bold">$4,891.20</p>
+        <div class="mt-2">
+          <span class="bg-green-100 text-green-600 px-2 py-1 rounded-full text-sm">Earning 9.8% APY</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Assets & Trade Finance -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <!-- Crypto Assets -->
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-lg font-semibold">Crypto Assets</h3>
+          <button class="tg-button" onclick="connectWallet()">
+            <i class="fas fa-wallet mr-2"></i>Connect Wallet
+          </button>
+        </div>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div class="flex items-center">
+              <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                <span class="font-semibold text-blue-600">D</span>
+              </div>
+              <div>
+                <p class="font-semibold">DTFS</p>
+                <p class="text-sm text-gray-500">Platform Token</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="font-semibold">2,500 DTFS</p>
+              <p class="text-sm text-gray-500">$2,750.00</p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div class="flex items-center">
+              <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                <span class="font-semibold text-green-600">P</span>
+              </div>
+              <div>
+                <p class="font-semibold">PADC</p>
+                <p class="text-sm text-gray-500">Trade Token</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="font-semibold">1,800 PADC</p>
+              <p class="text-sm text-gray-500">$1,641.60</p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div class="flex items-center">
+              <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                <span class="font-semibold text-blue-600">U</span>
+              </div>
+              <div>
+                <p class="font-semibold">USDC</p>
+                <p class="text-sm text-gray-500">Stablecoin</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="font-semibold">2,500 USDC</p>
+              <p class="text-sm text-gray-500">$2,500.00</p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div class="flex items-center">
+              <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                <span class="font-semibold text-green-600">U</span>
+              </div>
+              <div>
+                <p class="font-semibold">USDT</p>
+                <p class="text-sm text-gray-500">Stablecoin</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="font-semibold">2,750 USDT</p>
+              <p class="text-sm text-gray-500">$2,750.00</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trade Finance Status -->
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <h3 class="text-lg font-semibold mb-6">Trade Finance Status</h3>
+        <div class="space-y-4">
+          <div class="border rounded-lg p-4">
+            <div class="flex justify-between items-center mb-2">
+              <span class="font-semibold">Import Finance #IF-2023-001</span>
+              <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-sm">Active</span>
+            </div>
+            <div class="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p class="text-gray-500">Amount</p>
+                <p class="font-semibold">$3,000.00</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Fee</p>
+                <p class="font-semibold">3-5% </p>
+              </div>
+              <div>
+                <p class="text-gray-500">Due Date</p>
+                <p class="font-semibold">2023-09-15</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Status</p>
+                <p class="text-green-500">On Schedule</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="border rounded-lg p-4">
+            <div class="flex justify-between items-center mb-2">
+              <span class="font-semibold">Export Finance #EF-2023-002</span>
+              <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-sm">Active</span>
+            </div>
+            <div class="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p class="text-gray-500">Amount</p>
+                <p class="font-semibold">$222,250.00</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Fee</p>
+                <p class="font-semibold"> 3-5% </p>
+              </div>
+              <div>
+                <p class="text-gray-500">Due Date</p>
+                <p class="font-semibold">2023-10-01</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Status</p>
+                <p class="text-green-500">On Schedule</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fiat Exchangers -->
+    <div class="bg-white rounded-lg shadow-lg p-6">
+      <h3 class="text-lg font-semibold mb-6">Fiat Exchange Partners</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="border rounded-lg p-4 hover:shadow-lg transition-shadow">
+          <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+              <i class="fas fa-building text-blue-500"></i>
+            </div>
+            <div>
+              <p class="font-semibold">Binance</p>
+              <p class="text-sm text-gray-500">Global Exchange</p>
+            </div>
+          </div>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-gray-500">Exchange Rate (USD)</span>
+              <span class="font-semibold">1.00</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500">Processing Time</span>
+              <span class="font-semibold">Instant</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500">Fee</span>
+              <span class="font-semibold">0.1%</span>
+            </div>
+          </div>
+          <button class="tg-button w-full mt-4">Connect</button>
+        </div>
+
+        <div class="border rounded-lg p-4 hover:shadow-lg transition-shadow">
+          <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+              <i class="fas fa-building text-purple-500"></i>
+            </div>
+            <div>
+              <p class="font-semibold">Kraken</p>
+              <p class="text-sm text-gray-500">US/EU Exchange</p>
+            </div>
+          </div>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-gray-500">Exchange Rate (USD)</span>
+              <span class="font-semibold">1.00</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500">Processing Time</span>
+              <span class="font-semibold">1-2 hours</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500">Fee</span>
+              <span class="font-semibold">0.2%</span>
+            </div>
+          </div>
+          <button class="tg-button w-full mt-4">Connect</button>
+        </div>
+
+        <div class="border rounded-lg p-4 hover:shadow-lg transition-shadow">
+          <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+              <i class="fas fa-building text-green-500"></i>
+            </div>
+            <div>
+              <p class="font-semibold">FTX</p>
+              <p class="text-sm text-gray-500">Global Exchange</p>
+            </div>
+          </div>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-gray-500">Exchange Rate (USD)</span>
+              <span class="font-semibold">1.00</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500">Processing Time</span>
+              <span class="font-semibold">Instant</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500">Fee</span>
+              <span class="font-semibold">0.15%</span>
+            </div>
+          </div>
+          <button class="tg-button w-full mt-4">Connect</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+// New marketplace page function
+function showMarketplacePage() {
+  const mainContent = document.querySelector('.main-content');
+  mainContent.innerHTML = `
+    <div class="mb-8">
+      <h2 class="text-2xl font-bold">Marketplace</h2>
+      <p class="text-gray-600 mt-2">Discover and trade commodities, equipment, and more</p>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+      <div class="flex flex-wrap gap-4">
+        <div class="flex-1">
+          <div class="relative">
+            <input type="text" placeholder="Search products..." class="w-full pl-10 pr-4 py-2 border rounded-lg">
+            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+          </div>
+        </div>
+        <select class="border rounded-lg px-4 py-2">
+          <option>All Categories</option>
+          <option>Agro Commodities</option>
+          <option>Industrial Equipment</option>
+          <option>Textiles</option>
+          <option>Vehicles</option>
+        </select>
+        <select class="border rounded-lg px-4 py-2">
+          <option>Price Range</option>
+          <option>Under $1,000</option>
+          <option>$1,000 - $10,000</option>
+          <option>$10,000+</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Featured Items -->
+    <div class="mb-8">
+      <h3 class="text-lg font-semibold mb-4">Featured Items</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Coffee Beans -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+          <div class="h-48 bg-gray-100 flex items-center justify-center">
+            <i class="fas fa-coffee text-4xl text-gray-400"></i>
+          </div>
+          <div class="p-4">
+            <h4 class="font-semibold mb-2">Premium Coffee Beans</h4>
+            <p class="text-sm text-gray-600 mb-4">High-quality Arabica coffee beans</p>
+            <div class="flex justify-between items-center">
+              <span class="font-bold">$4,500/ton</span>
+              <button class="tg-button">View Details</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CNC Machine -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+          <div class="h-48 bg-gray-100 flex items-center justify-center">
+            <i class="fas fa-industry text-4xl text-gray-400"></i>
+          </div>
+          <div class="p-4">
+            <h4 class="font-semibold mb-2">CNC Machine</h4>
+            <p class="text-sm text-gray-600 mb-4">Industrial grade CNC machinery</p>
+            <div class="flex justify-between items-center">
+              <span class="font-bold">$25,000</span>
+              <button class="tg-button">View Details</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Textile Fabric -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+          <div class="h-48 bg-gray-100 flex items-center justify-center">
+            <i class="fas fa-tshirt text-4xl text-gray-400"></i>
+          </div>
+          <div class="p-4">
+            <h4 class="font-semibold mb-2">Cotton Fabric</h4>
+            <p class="text-sm text-gray-600 mb-4">Premium cotton textile material</p>
+            <div class="flex justify-between items-center">
+              <span class="font-bold">$3,200/roll</span>
+              <button class="tg-button">View Details</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Categories -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+      <div class="bg-white p-6 rounded-lg shadow-lg text-center hover:shadow-xl transition-shadow">
+        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-wheat-awn text-blue-500 text-2xl"></i>
+        </div>
+        <h4 class="font-semibold">Agro Commodities</h4>
+      </div>
+      <div class="bg-white p-6 rounded-lg shadow-lg text-center hover:shadow-xl transition-shadow">
+        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-industry text-purple-500 text-2xl"></i>
+        </div>
+        <h4 class="font-semibold">Industrial Equipment</h4>
+      </div>
+      <div class="bg-white p-6 rounded-lg shadow-lg text-center hover:shadow-xl transition-shadow">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-tshirt text-green-500 text-2xl"></i>
+        </div>
+        <h4 class="font-semibold">Textiles</h4>
+      </div>
+      <div class="bg-white p-6 rounded-lg shadow-lg text-center hover:shadow-xl transition-shadow">
+        <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-truck text-yellow-500 text-2xl"></i>
+        </div>
+        <h4 class="font-semibold">Vehicles</h4>
+      </div>
+    </div>
+  `;
+}
+
+function showProductsPage() {
+  const mainContent = document.querySelector('.main-content');
+  mainContent.innerHTML = `
+    <div class="mb-8">
+      <h2 class="text-2xl font-bold">Products</h2>
+      <p class="text-gray-600 mt-2">Manage your product listings</p>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex justify-between items-center mb-8">
+      <div class="flex gap-4">
+        <button class="tg-button">
+          <i class="fas fa-plus mr-2"></i>Add Product
+        </button>
+        <button class="tg-button">
+          <i class="fas fa-file-import mr-2"></i>Import Products
+        </button>
+      </div>
+      <div class="flex gap-4">
+        <button class="px-4 py-2 rounded-lg border hover:bg-gray-50">All Products</button>
+        <button class="px-4 py-2 rounded-lg border hover:bg-gray-50">Active</button>
+        <button class="px-4 py-2 rounded-lg border hover:bg-gray-50">Pending</button>
+        <button class="px-4 py-2 rounded-lg border hover:bg-gray-50">Draft</button>
+      </div>
+    </div>
+
+    <!-- Products List -->
+    <div class="bg-white rounded-lg shadow-lg p-6">
+      <div class="overflow-x-auto">
+        <table class="min-w-full">
+          <thead>
+            <tr class="bg-gray-50">
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <!-- Agricultural Commodities -->
+            <tr>
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-wheat-awn text-green-500"></i>
+                  </div>
+                  <div>
+                    <p class="font-semibold">Agricultural Commodities</p>
+                    <p class="text-sm text-gray-500">Premium grade</p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4">Agro</td>
+              <td class="px-6 py-4">$4,500/ton</td>
+              <td class="px-6 py-4">250 tons</td>
+              <td class="px-6 py-4">
+                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Active</span>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex gap-2">
+                  <button class="text-blue-600 hover:text-blue-900">Edit</button>
+                  <button class="text-red-600 hover:text-red-900">Delete</button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Industrial Equipment -->
+            <tr>
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-industry text-blue-500"></i>
+                  </div>
+                  <div>
+                    <p class="font-semibold">Industrial Equipment</p>
+                    <p class="text-sm text-gray-500">Heavy machinery</p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4">Equipment</td>
+              <td class="px-6 py-4">$25,000</td>
+              <td class="px-6 py-4">5 units</td>
+              <td class="px-6 py-4">
+                <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex gap-2">
+                  <button class="text-blue-600 hover:text-blue-900">Edit</button>
+                  <button class="text-red-600 hover:text-red-900">Delete</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+// New account page functions
+function showProfilePage() {
+  const mainContent = document.querySelector('.main-content');
+  mainContent.innerHTML = `
+    <div class="mb-8">
+      <h2 class="text-2xl font-bold">Profile</h2>
+      <p class="text-gray-600 mt-2">Manage your account information and preferences</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Profile Summary -->
+      <div class="lg:col-span-1">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+          <div class="text-center mb-6">
+            <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-user-circle text-4xl text-blue-500"></i>
+            </div>
+            <h3 class="font-semibold text-xl">John Doe</h3>
+            <p class="text-gray-600">Premium Member</p>
+          </div>
+          
+          <div class="space-y-4">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-award text-blue-500"></i>
+              </div>
+              <span>Top Trader</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-shield-alt text-green-500"></i>
+              </div>
+              <span>Verified Account</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-gem text-purple-500"></i>
+              </div>
+              <span>Premium Status</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Details -->
+      <div class="lg:col-span-2">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+          <h3 class="font-semibold text-xl mb-6">Profile Information</h3>
+          
+          <!-- Personal Information -->
+          <div class="mb-8">
+            <h4 class="font-semibold mb-4">Personal Information</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-gray-600 mb-1">Full Name</label>
+                <input type="text" value="John Doe" class="w-full p-2 border rounded-lg">
+              </div>
+              <div>
+                <label class="block text-sm text-gray-600 mb-1">Email</label>
+                <input type="email" value="john@example.com" class="w-full p-2 border rounded-lg">
+              </div>
+              <div>
+                <label class="block text-sm text-gray-600 mb-1">Phone</label>
+                <input type="tel" value="+1 234 567 8900" class="w-full p-2 border rounded-lg">
+              </div>
+              <div>
+                <label class="block text-sm text-gray-600 mb-1">Location</label>
+                <input type="text" value="New York, USA" class="w-full p-2 border rounded-lg">
+              </div>
+            </div>
+          </div>
+
+          <!-- Business Information -->
+          <div class="mb-8">
+            <h4 class="font-semibold mb-4">Business Information</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-gray-600 mb-1">Company Name</label>
+                <input type="text" value="Global Trade Co." class="w-full p-2 border rounded-lg">
+              </div>
+              <div>
+                <label class="block text-sm text-gray-600 mb-1">Position</label>
+                <input type="text" value="Trade Manager" class="w-full p-2 border rounded-lg">
+              </div>
+              <div>
+                <label class="block text-sm text-gray-600 mb-1">Industry</label>
+                <select class="w-full p-2 border rounded-lg">
+                  <option>International Trade</option>
+                  <option>Manufacturing</option>
+                  <option>Agriculture</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm text-gray-600 mb-1">Business Type</label>
+                <select class="w-full p-2 border rounded-lg">
+                  <option>Importer</option>
+                  <option>Exporter</option>
+                  <option>Both</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-end">
+            <button class="tg-button">Save Changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function showSettingsPage() {
+  const mainContent = document.querySelector('.main-content');
+  mainContent.innerHTML = `
+    <div class="mb-8">
+      <h2 class="text-2xl font-bold">Settings</h2>
+      <p class="text-gray-600 mt-2">Configure your account preferences and security settings</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Application Settings -->
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <h3 class="font-semibold text-xl mb-6">Application Settings</h3>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="font-semibold">Dark Mode</p>
+              <p class="text-sm text-gray-600">Enable dark theme</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" checked>
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="font-semibold">Notifications</p>
+              <p class="text-sm text-gray-600">Enable push notifications</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" checked>
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="font-semibold">Sound Effects</p>
+              <p class="text-sm text-gray-600">Enable sound notifications</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox">
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security Settings -->
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <h3 class="font-semibold text-xl mb-6">Security Settings</h3>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="font-semibold">Two-Factor Authentication</p>
+              <p class="text-sm text-gray-600">Enable 2FA security</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" checked>
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="font-semibold">Login Notifications</p>
+              <p class="text-sm text-gray-600">Get notified of new logins</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" checked>
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="font-semibold">Transaction Signing</p>
+              <p class="text-sm text-gray-600">Require signature for transactions</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" checked>
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trading Preferences -->
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <h3 class="font-semibold text-xl mb-6">Trading Preferences</h3>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm text-gray-600 mb-1">Default Currency</label>
+            <select class="w-full p-2 border rounded-lg">
+              <option>USD</option>
+              <option>EUR</option>
+              <option>GBP</option>
+            </select>
+          </div>
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="font-semibold">Trade Confirmation</p>
+              <p class="text-sm text-gray-600">Require confirmation before trades</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" checked>
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="font-semibold">Price Alerts</p>
+              <p class="text-sm text-gray-600">Enable price movement alerts</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox">
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- API Settings -->
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <h3 class="font-semibold text-xl mb-6">API Settings</h3>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm text-gray-600 mb-1">API Key</label>
+            <div class="flex gap-2">
+              <input type="text" value="****************************************" class="flex-1 p-2 border rounded-lg" readonly>
+              <button class="tg-button">Generate New</button>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="font-semibold">API Access</p>
+              <p class="text-sm text-gray-600">Enable API access</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" checked>
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <div>
+            <label class="block text-sm text-gray-600 mb-1">API Rate Limit</label>
+            <select class="w-full p-2 border rounded-lg">
+              <option>100 requests/min</option>
+              <option>500 requests/min</option>
+              <option>1000 requests/min</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function showTradeChatPage() {
+  const mainContent = document.querySelector('.main-content');
+  mainContent.innerHTML = `
+    <div class="mb-8">
+      <h2 class="text-2xl font-bold">Trade Chat</h2>
+      <p class="text-gray-600 mt-2">Communicate with your trading partners</p>
+    </div>
+
+    <!-- Chat Layout -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Contacts List -->
+      <div class="bg-white rounded-lg shadow-lg">
+        <div class="p-4 border-b flex justify-between items-center">
+          <h3 class="font-semibold">Contacts</h3>
+          <button class="tg-button">
+            <i class="fas fa-plus mr-2"></i>New Chat
+          </button>
+        </div>
+        <div class="divide-y">
+          <!-- Contact Items -->
+          <div class="p-4 flex items-center hover:bg-gray-50 cursor-pointer">
+            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+              <i class="fas fa-building text-blue-500"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold">Global Imports Co.</h4>
+              <p class="text-sm text-gray-500">Last message: 2 hrs ago</p>
+            </div>
+            <span class="ml-auto text-xs bg-red-500 text-white rounded-full px-2 py-1">3</span>
+          </div>
+          <div class="p-4 flex items-center hover:bg-gray-50 cursor-pointer">
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
+              <i class="fas fa-ship text-green-500"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold">Maritime Traders Inc.</h4>
+              <p class="text-sm text-gray-500">Last message: Yesterday</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Window -->
+      <div class="md:col-span-2 bg-white rounded-lg shadow-lg flex flex-col">
+        <div class="p-4 border-b flex justify-between items-center">
+          <div class="flex items-center">
+            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+              <i class="fas fa-building text-blue-500"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold">Global Imports Co.</h4>
+              <p class="text-sm text-gray-500">Trade #TF238</p>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button class="tg-button">Confirm Tittle/ documents transfer</button>
+            <button class="tg-button">Stake Trade Value</button>
+            <button class="tg-button" style="background: #ef4444">Raise Dispute</button>
+          </div>
+        </div>
+
+        <!-- Chat Messages -->
+        <div class="flex-1 p-4 overflow-y-auto">
+          <div class="space-y-4">
+            <!-- Incoming Message -->
+            <div class="flex">
+              <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                <i class="fas fa-user text-blue-500"></i>
+              </div>
+              <div>
+                <div class="bg-gray-100 p-3 rounded-lg max-w-md">
+                  <p>Hi, can we discuss the details of the recent trade request?</p>
+                </div>
+                <span class="text-xs text-gray-500 mt-1">2:45 PM</span>
+              </div>
+            </div>
+
+            <!-- Outgoing Message -->
+            <div class="flex justify-end">
+              <div>
+                <div class="bg-blue-500 text-white p-3 rounded-lg max-w-md">
+                  <p>Sure, I'm available to discuss the trade terms.</p>
+                </div>
+                <div class="text-right">
+                  <span class="text-xs text-gray-500 mt-1">2:46 PM</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Message Input -->
+        <div class="p-4 border-t">
+          <div class="flex gap-2">
+            <input type="text" placeholder="Type your message..." class="flex-1 p-2 border rounded-lg">
+            <button class="tg-button">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function showTradeRequestPage() {
+  const mainContent = document.querySelector('.main-content');
+  mainContent.innerHTML = `
+    <div class="mb-8">
+      <h2 class="text-2xl font-bold">Trade Requests</h2>
+      <p class="text-gray-600 mt-2">Manage and track your trade requests</p>
+    </div>
+
+    <!-- Request Actions -->
+    <div class="flex justify-between mb-8">
+      <div class="flex gap-4">
+        <button class="tg-button">
+          <i class="fas fa-plus mr-2"></i>New Trade Request
+        </button>
+        <button class="tg-button">
+          <i class="fas fa-file-import mr-2"></i>Import Requests
+        </button>
+      </div>
+      <div class="flex gap-4">
+        <button class="px-4 py-2 rounded-lg border hover:bg-gray-50">All Requests</button>
+        <button class="px-4 py-2 rounded-lg border hover:bg-gray-50">Pending</button>
+        <button class="px-4 py-2 rounded-lg border hover:bg-gray-50">Approved</button>
+        <button class="px-4 py-2 rounded-lg border hover:bg-gray-50">Rejected</button>
+      </div>
+    </div>
+
+    <!-- Trade Requests Table -->
+    <div class="bg-white rounded-lg shadow-lg p-6">
+      <div class="overflow-x-auto">
+        <table class="min-w-full">
+          <thead>
+            <tr class="bg-gray-50">
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Request ID</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trading Partner</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trade Type</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr>
+              <td class="px-6 py-4">#TF238</td>
+              <td class="px-6 py-4">
+                <div class="flex items-center">
+                  <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-2">
+                    <i class="fas fa-building text-blue-500"></i>
+                  </div>
+                  Global Imports Co.
+                </div>
+              </td>
+              <td class="px-6 py-4">Import Finance</td>
+              <td class="px-6 py-4">$50,000</td>
+              <td class="px-6 py-4">
+                <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex gap-2">
+                  <button class="text-blue-600 hover:text-blue-900">View</button>
+                  <button class="text-green-600 hover:text-green-900">Approve</button>
+                  <button class="text-red-600 hover:text-red-900">Reject</button>
+                </div>
+              </td>
+            </tr>
+            <!-- More request rows can be added -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function showTradeNotificationsPage() {
+  const mainContent = document.querySelector('.main-content');
+  mainContent.innerHTML = `
+    <div class="mb-8">
+      <h2 class="text-2xl font-bold">Trade Notifications</h2>
+      <p class="text-gray-600 mt-2">Stay updated with your trade activities</p>
+    </div>
+
+    <!-- Notification Filters -->
+    <div class="bg-white rounded-lg shadow-lg p-4 mb-8">
+      <div class="flex flex-wrap gap-4">
+        <button class="px-4 py-2 rounded-lg bg-blue-500 text-white">All</button>
+        <button class="px-4 py-2 rounded-lg border hover:bg-gray-50">Trade Requests</button>
+        <button class="px-4 py-2 rounded-lg border hover:bg-gray-50">Disputes</button>
+        <button class="px-4 py-2 rounded-lg border hover:bg-gray-50">Payments</button>
+        <button class="px-4 py-2 rounded-lg border hover:bg-gray-50">Shipments</button>
+      </div>
+    </div>
+
+    <!-- Notifications List -->
+    <div class="bg-white rounded-lg shadow-lg p-6">
+      <div class="space-y-4">
+        <!-- Trade Request Notification -->
+        <div class="flex items-start gap-4 p-4 border rounded-lg hover:bg-gray-50">
+          <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+            <i class="fas fa-handshake text-blue-500"></i>
+          </div>
+          <div class="flex-1">
+            <div class="flex justify-between items-start">
+              <div>
+                <h4 class="font-semibold">New Trade Request</h4>
+                <p class="text-gray-600">Global Imports Co. sent a new trade request for $50,000</p>
+              </div>
+              <span class="text-sm text-gray-500">2 mins ago</span>
+            </div>
+            <div class="mt-2 flex gap-2">
+              <button class="tg-button">View Request</button>
+              <button class="px-4 py-2 rounded-lg border hover:bg-gray-100">Dismiss</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dispute Notification -->
+        <div class="flex items-start gap-4 p-4 border rounded-lg hover:bg-gray-50">
+          <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+            <i class="fas fa-exclamation-triangle text-red-500"></i>
+          </div>
+          <div class="flex-1">
+            <div class="flex justify-between items-start">
+              <div>
+                <h4 class="font-semibold">Trade Dispute Opened</h4>
+                <p class="text-gray-600">A dispute has been raised on Trade #TF238</p>
+              </div>
+              <span class="text-sm text-gray-500">1 hour ago</span>
+            </div>
+            <div class="mt-2 flex gap-2">
+              <button class="tg-button">Resolve Dispute</button>
+              <button class="px-4 py-2 rounded-lg border hover:bg-gray-100">Details</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Add event listeners for account pages
+document.querySelectorAll('a[href="#account/profile"], a[href="#account/settings"], a[href="#account/notifications"]').forEach(link => {
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    const page = e.target.closest('a').getAttribute('href').split('/')[1];
+    switch(page) {
+      case 'profile':
+        showProfilePage();
+        break;
+      case 'settings':
+        showSettingsPage();
+        break;
+      case 'notifications':
+        showNotificationsPage();
+        break;
+    }
+  });
+});
+
+function showTradeFinancePage() {
+  const mainContent = document.querySelector('.main-content');
+  mainContent.innerHTML = `
+    <div class="mb-8">
+      <h2 class="text-2xl font-bold">Trade Finance</h2>
+      <p class="text-gray-600 mt-2">Select financing options for your trade</p>
+    </div>
+
+    <!-- Finance Options Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <!-- Import Finance -->
+      <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-ship text-blue-500 text-xl"></i>
+          </div>
+          <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm">Import</span>
+        </div>
+        <h3 class="text-lg font-semibold mb-2">Import Finance</h3>
+        <p class="text-gray-600 mb-4">Financial support for importing goods with flexible payment terms</p>
+        <ul class="text-sm text-gray-600 space-y-2 mb-4">
+          <li class="flex items-center">
+            <i class="fas fa-check text-green-500 mr-2"></i>
+            <span>Up to 120 days financing period</span>
+          </li>
+          <li class="flex items-center">
+            <i class="fas fa-check text-green-500 mr-2"></i>
+            <span>Competitive interest rates</span>
+          </li>
+          <li class="flex items-center">
+            <i class="fas fa-check text-green-500 mr-2"></i>
+            <span>Quick approval process</span>
+          </li>
+        </ul>
+        <button onclick="showImportFinanceRequest()" class="tg-button w-full">Apply Now</button>
+      </div>
+
+      <!-- Export Finance -->
+      <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-box text-green-500 text-xl"></i>
+          </div>
+          <span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm">Export</span>
+        </div>
+        <h3 class="text-lg font-semibold mb-2">Export Finance</h3>
+        <p class="text-gray-600 mb-4">Pre and post-shipment financing for exporters</p>
+        <ul class="text-sm text-gray-600 space-y-2 mb-4">
+          <li class="flex items-center">
+            <i class="fas fa-check text-green-500 mr-2"></i>
+            <span>Pre-shipment financing</span>
+          </li>
+          <li class="flex items-center">
+            <i class="fas fa-check text-green-500 mr-2"></i>
+            <span>Post-shipment financing</span>
+          </li>
+          <li class="flex items-center">
+            <i class="fas fa-check text-green-500 mr-2"></i>
+            <span>Export credit guarantee</span>
+          </li>
+        </ul>
+        <button onclick="showExportFinanceRequest()" class="tg-button w-full">Apply Now</button>
+      </div>
+
+      <!-- Supply Chain Finance -->
+      <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-link text-purple-500 text-xl"></i>
+          </div>
+          <span class="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-sm">Supply Chain</span>
+        </div>
+        <h3 class="text-lg font-semibold mb-2">Supply Chain Finance</h3>
+        <p class="text-gray-600 mb-4">Optimize working capital across your supply chain</p>
+        <ul class="text-sm text-gray-600 space-y-2 mb-4">
+          <li class="flex items-center">
+            <i class="fas fa-check text-green-500 mr-2"></i>
+            <span>Early payments to suppliers</span>
+          </li>
+          <li class="flex items-center">
+            <i class="fas fa-check text-green-500 mr-2"></i>
+            <span>Extended payment terms</span>
+          </li>
+          <li class="flex items-center">
+            <i class="fas fa-check text-green-500 mr-2"></i>
+            <span>Supply chain optimization</span>
+          </li>
+        </ul>
+        <button onclick="showSupplyChainFinanceRequest()" class="tg-button w-full">Apply Now</button>
+      </div>
+
+      <!-- Factoring -->
+      <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-receipt text-orange-500 text-xl"></i>
+          </div>
+          <span class="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-sm">Factoring</span>
+        </div>
+        <h3 class="text-lg font-semibold mb-2">Factoring</h3>
+        <p class="text-gray-600 mb-4">Convert your receivables to immediate cash</p>
+        <ul class="text-sm text-gray-600 space-y-2 mb-4">
+          <li class="flex items-center">
+            <i class="fas fa-check text-green-500 mr-2"></i>
+            <span>Immediate working capital</span>
+          </li>
+          <li class="flex items-center">
+            <i class="fas fa-check text-green-500 mr-2"></i>
+            <span>No additional debt</span>
+          </li>
+          <li class="flex items-center">
+            <i class="fas fa-check text-green-500 mr-2"></i>
+            <span>Flexible terms</span>
+          </li>
+        </ul>
+        <button onclick="showFactoringRequest()" class="tg-button w-full">Apply Now</button>
+      </div>
+
+      <!-- Shariah Compliant Finance -->
+      <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-star-and-crescent text-teal-500 text-xl"></i>
+          </div>
+          <span class="bg-teal-100 text-teal-600 px-3 py-1 rounded-full text-sm">Islamic</span>
+        </div>
+        <h3 class="text-lg font-semibold mb-2">Shariah Compliant Finance</h3>
+        <p class="text-gray-600 mb-4">Islamic finance solutions for international trade</p>
+        <ul class="text-sm text-gray-600 space-y-2 mb-4">
+          <li class="flex items-center">
+            <i class="fas fa-check text-green-500 mr-2"></i>
+            <span>Murabaha financing</span>
+          </li>
+          <li class="flex items-center">
+            <i class="fas fa-check text-green-500 mr-2"></i>
+            <span>Ijara arrangements</span>
+          </li>
+          <li class="flex items-center">
+            <i class="fas fa-check text-green-500 mr-2"></i>
+            <span>Shariah compliant terms</span>
+          </li>
+        </ul>
+        <button onclick="showShariahFinanceRequest()" class="tg-button w-full">Apply Now</button>
+      </div>
+
+      <!-- Startup Finance -->
+      <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-rocket text-indigo-500 text-xl"></i>
+          </div>
+          <span class="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-sm">Startup</span>
+        </div>
+        <h3 class="text-lg font-semibold mb-2">Startup Finance</h3>
+        <p class="text-gray-600 mb-4">Specialized financing solutions for startup traders</p>
+        <ul class="text-sm text-gray-600 space-y-2 mb-4">
+          <li class="flex items-center">
+            <i class="fas fa-check text-green-500 mr-2"></i>
+            <span>Flexible payment terms</span>
+          </li>
+          <li class="flex items-center">
+            <i class="fas fa-check text-green-500 mr-2"></i>
+            <span>Growth-based financing</span>
+          </li>
+          <li class="flex items-center">
+            <i class="fas fa-check text-green-500 mr-2"></i>
+            <span>Mentorship support</span>
+          </li>
+        </ul>
+        <button onclick="showStartupFinanceRequest()" class="tg-button w-full">Apply Now</button>
+      </div>
+    </div>
+
+    <!-- Recent Applications -->
+    <div class="bg-white rounded-lg shadow-lg p-6">
+      <h3 class="text-lg font-semibold mb-4">Recent Applications</h3>
+      <div class="overflow-x-auto">
+        <table class="min-w-full">
+          <thead>
+            <tr class="border-b">
+              <th class="text-left py-3">Reference ID</th>
+              <th class="text-left py-3">Type</th>
+              <th class="text-left py-3">Amount</th>
+              <th class="text-left py-3">Status</th>
+              <th class="text-left py-3">Date</th>
+              <th class="text-left py-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b">
+              <td class="py-3">FIN-2023-001</td>
+              <td class="py-3">Import Finance</td>
+              <td class="py-3">$250,000</td>
+              <td class="py-3"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-sm">Pending</span></td>
+              <td class="py-3">2023-06-15</td>
+              <td class="py-3">
+                <button class="text-blue-500 hover:underline">View Details</button>
+              </td>
+            </tr>
+            <tr class="border-b">
+              <td class="py-3">FIN-2023-002</td>
+              <td class="py-3">Export Finance</td>
+              <td class="py-3">$500,000</td>
+              <td class="py-3"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">Approved</span></td>
+              <td class="py-3">2023-06-14</td>
+              <td class="py-3">
+                <button class="text-blue-500 hover:underline">View Details</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function showImportFinanceRequest() {
+  showModal('Import Finance Request', `
+    <form class="space-y-6">
+      <!-- Trade Details -->
+      <div class="space-y-4">
+        <div class="form-group">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Import Type</label>
+          <select class="w-full rounded-lg border border-gray-300 p-3" required>
+            <option value="">Select Import Type</option>
+            <option value="raw_materials">Raw Materials</option>
+            <option value="machinery">Machinery & Equipment</option>
+            <option value="finished_goods">Finished Goods</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Amount</label>
+            <input type="number" class="w-full rounded-lg border border-gray-300 p-3" placeholder="Enter amount">
+          </div>
+          <div class="form-group">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Currency</label>
+            <select class="w-full rounded-lg border border-gray-300 p-3">
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+              <option value="GBP">GBP</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Tenor (Days)</label>
+          <input type="number" class="w-full rounded-lg border border-gray-300 p-3" placeholder="Enter tenor in days">
+        </div>
+        <div class="form-group">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Import License Number</label>
+          <input type="text" class="w-full rounded-lg border border-gray-300 p-3" placeholder="Enter import license number">
+        </div>
+        <div class="form-group">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Port of Entry</label>
+          <input type="text" class="w-full rounded-lg border border-gray-300 p-3" placeholder="Enter port of entry">
+        </div>
+      </div>
+      <div class="space-y-4">
+        <h3 class="font-semibold">Required Documents</h3>
+        <div class="space-y-2">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-upload text-gray-400"></i>
+            <span>Import License</span>
+            <input type="file" class="hidden" accept=".pdf,.doc,.docx">
+            <button class="ml-auto px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100">Upload</button>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fas fa-upload text-gray-400"></i>
+            <span>Proforma Invoice</span>
+            <input type="file" class="hidden" accept=".pdf,.doc,.docx">
+            <button class="ml-auto px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100">Upload</button>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fas fa-upload text-gray-400"></i>
+            <span>Purchase Order</span>
+            <input type="file" class="hidden" accept=".pdf,.doc,.docx">
+            <button class="ml-auto px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100">Upload</button>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end space-x-4 mt-6">
+        <button type="button" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200" onclick="this.closest('.modal-backdrop').remove()">Cancel</button>
+        <button type="submit" class="tg-button">Submit Request</button>
+      </div>
+    </form>
+  `);
+}
+
+function showExportFinanceRequest() {
+  showModal('Export Finance Request', `
+    <form class="space-y-6">
+      <div class="space-y-4">
+        <div class="form-group">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Export Type</label>
+          <select class="w-full rounded-lg border border-gray-300 p-3" required>
+            <option value="">Select Export Type</option>
+            <option value="finished_goods">Finished Goods</option>
+            <option value="raw_materials">Raw Materials</option>
+            <option value="services">Services</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Amount</label>
+            <input type="number" class="w-full rounded-lg border border-gray-300 p-3" placeholder="Enter amount">
+          </div>
+          <div class="form-group">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Currency</label>
+            <select class="w-full rounded-lg border border-gray-300 p-3">
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+              <option value="GBP">GBP</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Tenor (Days)</label>
+          <input type="number" class="w-full rounded-lg border border-gray-300 p-3" placeholder="Enter tenor in days">
+        </div>
+        <div class="form-group">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Export License Number</label>
+          <input type="text" class="w-full rounded-lg border border-gray-300 p-3" placeholder="Enter export license number">
+        </div>
+      </div>
+      <div class="space-y-4">
+        <h3 class="font-semibold">Required Documents</h3>
+        <div class="space-y-2">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-upload text-gray-400"></i>
+            <span>Export License</span>
+            <input type="file" class="hidden" accept=".pdf,.doc,.docx">
+            <button class="ml-auto px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100">Upload</button>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fas fa-upload text-gray-400"></i>
+            <span>Sales Contract</span>
+            <input type="file" class="hidden" accept=".pdf,.doc,.docx">
+            <button class="ml-auto px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100">Upload</button>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fas fa-upload text-gray-400"></i>
+            <span>Insurance Certificate</span>
+            <input type="file" class="hidden" accept=".pdf,.doc,.docx">
+            <button class="ml-auto px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100">Upload</button>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end space-x-4 mt-6">
+        <button type="button" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200" onclick="this.closest('.modal-backdrop').remove()">Cancel</button>
+        <button type="submit" class="tg-button">Submit Request</button>
+      </div>
+    </form>
+  `);
+}
+
+function showSupplyChainFinanceRequest() {
+  showModal('Supply Chain Finance Request', `
+    <form class="space-y-6">
+      <div class="space-y-4">
+        <div class="form-group">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Anchor Company</label>
+          <input type="text" class="w-full rounded-lg border border-gray-300 p-3" placeholder="Enter anchor company name">
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Amount</label>
+            <input type="number" class="w-full rounded-lg border border-gray-300 p-3" placeholder="Enter amount">
+          </div>
+          <div class="form-group">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Currency</label>
+            <select class="w-full rounded-lg border border-gray-300 p-3">
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+              <option value="GBP">GBP</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Payment Terms (Days)</label>
+          <input type="number" class="w-full rounded-lg border border-gray-300 p-3" placeholder="Enter payment terms">
+        </div>
+        <div class="form-group">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Annual Transaction Volume</label>
+          <input type="number" class="w-full rounded-lg border border-gray-300 p-3" placeholder="Enter annual transaction volume">
+        </div>
+      </div>
+      <div class="space-y-4">
+        <h3 class="font-semibold">Required Documents</h3>
+        <div class="space-y-2">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-upload text-gray-400"></i>
+            <span>Supplier Agreements</span>
+            <input type="file" class="hidden" accept=".pdf,.doc,.docx">
+            <button class="ml-auto px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100">Upload</button>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fas fa-upload text-gray-400"></i>
+            <span>Purchase Orders</span>
+            <input type="file" class="hidden" accept=".pdf,.doc,.docx">
+            <button class="ml-auto px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100">Upload</button>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fas fa-upload text-gray-400"></i>
+            <span>Financial Statements</span>
+            <input type="file" class="hidden" accept=".pdf,.doc,.docx">
+            <button class="ml-auto px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100">Upload</button>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end space-x-4 mt-6">
+        <button type="button" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200" onclick="this.closest('.modal-backdrop').remove()">Cancel</button>
+        <button type="submit" class="tg-button">Submit Request</button>
+      </div>
+    </form>
+  `);
+}
+
+function showFactoringRequest() {
+  showModal('Factoring Request', `
+    <form class="space-y-6">
+      <div class="space-y-4">
+        <div class="form-group">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Factoring Type</label>
+          <select class="w-full rounded-lg border border-gray-300 p-3" required>
+            <option value="">Select Type</option>
+            <option value="recourse">With Recourse</option>
+            <option value="non_recourse">Without Recourse</option>
+            <option value="islamic">Islamic Factoring</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Invoice Amount</label>
+            <input type="number" class="w-full rounded-lg border border-gray-300 p-3" placeholder="Enter invoice amount">
+          </div>
+          <div class="form-group">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Currency</label>
+            <select class="w-full rounded-lg border border-gray-300 p-3">
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+              <option value="GBP">GBP</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Invoice Due Date</label>
+          <input type="date" class="w-full rounded-lg border border-gray-300 p-3">
+        </div>
+        <div class="form-group">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Debtor Information</label>
+          <textarea class="w-full rounded-lg border border-gray-300 p-3" rows="3" placeholder="Enter debtor details"></textarea>
+        </div>
+      </div>
+      <div class="space-y-4">
+        <h3 class="font-semibold">Required Documents</h3>
+        <div class="space-y-2">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-upload text-gray-400"></i>
+            <span>Invoice</span>
+            <input type="file" class="hidden" accept=".pdf,.doc,.docx">
+            <button class="ml-auto px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100">Upload</button>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fas fa-upload text-gray-400"></i>
+            <span>Delivery Documents</span>
+            <input type="file" class="hidden" accept=".pdf,.doc,.docx">
+            <button class="ml-auto px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100">Upload</button>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fas fa-upload text-gray-400"></i>
+            <span>Debtor Credit Report</span>
+            <input type="file" class="hidden" accept=".pdf,.doc,.docx">
+            <button class="ml-auto px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100">Upload</button>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end space-x-4 mt-6">
+        <button type="button" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200" onclick="this.closest('.modal-backdrop').remove()">Cancel</button>
+        <button type="submit" class="tg-button">Submit Request</button>
+      </div>
+    </form>
+  `);
+}
+
+function showShariahFinanceRequest() {
+  showModal('Shariah Compliant Finance Request', `
+    <form class="space-y-6">
+      <div class="space-y-4">
+        <div class="form-group">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Islamic Structure</label>
+          <select class="w-full rounded-lg border border-gray-300 p-3" required>
+            <option value="">Select Structure</option>
+            <option value="murabaha">Murabaha</option>
+            <option value="ijara">Ijara</option>
+            <option value="musharaka">Musharaka</option>
+            <option value="mudaraba">Mudaraba</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Amount</label>
+            <input type="number" class="w-full rounded-lg border border-gray-300 p-3" placeholder="Enter amount">
+          </div>
+          <div class="form-group">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Currency</label>
+            <select class="w-full rounded-lg border border-gray-300 p-3">
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+              <option value="GBP">GBP</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Tenor (Days)</label>
+          <input type="number" class="w-full rounded-lg border border-gray-300 p-3" placeholder="Enter tenor in days">
+        </div>
+        <div class="form-group">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Purpose of Financing</label>
+          <textarea class="w-full rounded-lg border border-gray-300 p-3" rows="3" placeholder="Describe the purpose of financing"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Shariah Advisor</label>
+          <input type="text" class="w-full rounded-lg border border-gray-300 p-3" placeholder="Enter Shariah advisor name">
+        </div>
+      </div>
+      <div class="space-y-4">
+        <h3 class="font-semibold">Required Documents</h3>
+        <div class="space-y-2">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-upload text-gray-400"></i>
+            <span>Shariah Compliance Certificate</span>
+            <input type="file" class="hidden" accept=".pdf,.doc,.docx">
+            <button class="ml-auto px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100">Upload</button>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fas fa-upload text-gray-400"></i>
+            <span>Trade Documents</span>
+            <input type="file" class="hidden" accept=".pdf,.doc,.docx">
+            <button class="ml-auto px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100">Upload</button>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fas fa-upload text-gray-400"></i>
+            <span>Company Profile</span>
+            <input type="file" class="hidden" accept=".pdf,.doc,.docx">
+            <button class="ml-auto px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100">Upload</button>
+          </div>
+        </div>
+      </div>
+      <div class="space-y-4">
+        <h3 class="font-semibold">Shariah Declaration</h3>
+        <div class="space-y-2">
+          <div class="flex items-center gap-2">
+            <input type="checkbox" id="declaration1" class="rounded">
+            <label for="declaration1" class="text-sm">I declare that this transaction complies with Shariah principles</label>
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="checkbox" id="declaration2" class="rounded">
+            <label for="declaration2" class="text-sm">I confirm that the funds will not be used for non-halal activities</label>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end space-x-4 mt-6">
+        <button type="button" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200" onclick="this.closest('.modal-backdrop').remove()">Cancel</button>
+        <button type="submit" class="tg-button">Submit Request</button>
+      </div>
+    </form>
+  `);
+}
+
+function showStartupFinanceRequest() {
+  showModal('Startup Finance Request', `
+    <form class="space-y-6">
+      <div class="space-y-4">
+        <div class="form-group">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Business Stage</label>
+          <select class="w-full rounded-lg border border-gray-300 p-3" required>
+            <option value="">Select Stage</option>
+            <option value="ideation">Ideation</option>
+            <option value="mvp">MVP</option>
+            <option value="early_revenue">Early Revenue</option>
+            <option value="growth">Growth Stage</option>
+          </select>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Funding Amount</label>
+            <input type="number" class="w-full rounded-lg border border-gray-300 p-3" placeholder="Enter amount">
+          </div>
+          <div class="form-group">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Currency</label>
+            <select class="w-full rounded-lg border border-gray-300 p-3">
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+              <option value="GBP">GBP</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Monthly Revenue</label>
+          <input type="number" class="w-full rounded-lg border border-gray-300 p-3" placeholder="Enter monthly revenue">
+        </div>
+
+        <div class="form-group">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Time in Business</label>
+          <select class="w-full rounded-lg border border-gray-300 p-3">
+            <option value="">Select Time Period</option>
+            <option value="0-6">0-6 months</option>
+            <option value="6-12">6-12 months</option>
+            <option value="12-24">1-2 years</option>
+            <option value="24+">2+ years</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Use of Funds</label>
+          <textarea class="w-full rounded-lg border border-gray-300 p-3" rows="3" placeholder="Describe how you plan to use the funds"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Growth Strategy</label>
+          <textarea class="w-full rounded-lg border border-gray-300 p-3" rows="3" placeholder="Outline your business growth strategy"></textarea>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <h3 class="font-semibold">Required Documents</h3>
+        <div class="space-y-2">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-upload text-gray-400"></i>
+            <span>Business Plan</span>
+            <input type="file" class="hidden" accept=".pdf,.doc,.docx">
+            <button class="ml-auto px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100">Upload</button>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fas fa-upload text-gray-400"></i>
+            <span>Financial Projections</span>
+            <input type="file" class="hidden" accept=".pdf,.xls,.xlsx">
+            <button class="ml-auto px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100">Upload</button>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fas fa-upload text-gray-400"></i>
+            <span>Bank Statements (Last 6 months)</span>
+            <input type="file" class="hidden" accept=".pdf,.xls,.xlsx">
+            <button class="ml-auto px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100">Upload</button>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fas fa-upload text-gray-400"></i>
+            <span>Pitch Deck</span>
+            <input type="file" class="hidden" accept=".pdf,.ppt,.pptx">
+            <button class="ml-auto px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100">Upload</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-4 mt-6">
+        <button type="button" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200" onclick="this.closest('.modal-backdrop').remove()">Cancel</button>
+        <button type="submit" class="tg-button">Submit Request</button>
+      </div>
+    </form>
+  `);
+}
+
+document.querySelector('a[href="#finance"]').addEventListener('click', (e) => {
+  e.preventDefault();
+  showTradeFinancePage();
+});
+
+// Charts
+const tradeVolumeCtx = document.getElementById('tradeVolumeChart').getContext('2d');
+new Chart(tradeVolumeCtx, {
+  type: 'line',
+  data: {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    datasets: [{
+      label: 'Trade Volume',
+      data: [65000, 120000, 80000, 150000, 190000, 750000],
+      borderColor: '#2563eb',
+      tension: 0.4
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: {
+        display: false
+      }
+    }
+  }
+});
+
+const stakingCtx = document.getElementById('stakingChart').getContext('2d');
+new Chart(stakingCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['DTFS', 'PADC', 'USDC', 'USDT'],
+    datasets: [{
+      data: [40, 25, 20, 15],
+      backgroundColor: ['#2563eb', '#0ea5e9', '#64748b', '#94a3b8']
+    }]
+  },
+  options: {
+    responsive: true
+  }
+});
+
+// Mobile menu
+const menuButton = document.createElement('button');
+menuButton.classList.add('md:hidden', 'fixed', 'top-4', 'left-4', 'z-50', 'p-2', 'bg-white', 'rounded-lg', 'shadow');
+menuButton.innerHTML = '<i class="fas fa-bars"></i>';
+document.body.appendChild(menuButton);
+
+menuButton.addEventListener('click', () => {
+  const sidebar = document.querySelector('.sidebar');
+  sidebar.classList.toggle('open');
+});
+
+// Handle navigation
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', (e) => {
+    if (!item.closest('.dropdown-content')) {
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+    }
+    
+    const route = item.getAttribute('href').replace('#', '');
+    if (route === 'trade/request') {
+      showTradeRequestPage();
+    } else if (route === 'trade/notifications') {
+      showTradeInboxPage();
+    } else if (route === 'trade/chat') {
+      showTradeChatPage('TR-2023-001', 'Global Imports Co.');
+    } else if (route === 'staking/pools') {
+      showStakingPoolsPage();
+    } else if (route === 'staking/rewards') {
+      showStakingRewardsPage();
+    } else if (route === 'staking/history') {
+      showStakingHistoryPage();
+    } else if (route === 'wallet') {
+      showWalletPage();
+    } else if (route === 'tradehub/marketplace') {
+      showMarketplacePage();
+    } else if (route === 'tradehub/products') {
+      showProductsPage();
+    }
+
+    webapp.MainButton.text = `View ${route.charAt(0).toUpperCase() + route.slice(1)}`;
+    webapp.MainButton.show();
+  });
+});
+
+// MainButton handler
+webapp.MainButton.onClick(() => {
+  // Handle main button click
+  webapp.showAlert(`Navigating to ${webapp.MainButton.text}`);
+});
+
+// Modal functionality
+function addStylesForModal() {
+  const styleEl = document.createElement('style');
+  styleEl.textContent = `
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+
+    .modal-content {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      max-width: 90%;
+      width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      z-index: 1001;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.5rem;
+    }
+  `;
+  document.head.appendChild(styleEl);
+}
+
+function showModal(title, content) {
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop';
+  
+  const modalContent = document.createElement('div');
+  modalContent.className = 'modal-content';
+  
+  const header = document.createElement('div');
+  header.className = 'modal-header';
+  header.innerHTML = `
+    <h2 class="text-xl font-bold">${title}</h2>
+    <button class="modal-close">&times;</button>
+  `;
+  
+  const body = document.createElement('div');
+  body.innerHTML = content;
+  
+  modalContent.appendChild(header);
+  modalContent.appendChild(body);
+  backdrop.appendChild(modalContent);
+  document.body.appendChild(backdrop);
+  
+  backdrop.style.display = 'block';
+  
+  const closeModal = () => {
+    backdrop.style.display = 'none';
+    backdrop.remove();
+  };
+  
+  backdrop.querySelector('.modal-close').addEventListener('click', closeModal);
+  backdrop.addEventListener('click', (e) => {
+    if (e.target === backdrop) closeModal();
+  });
+  
+  const form = modalContent.querySelector('form');
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      alert('Request submitted successfully');
+      closeModal();
+    });
+  }
+}
+
+// Helper function to create message elements
+function createMessage(text, isUser = false) {
+  const div = document.createElement('div');
+  div.className = `flex items-start gap-3 ${isUser ? 'flex-row-reverse' : ''}`;
+  div.innerHTML = `
+    <div class="w-8 h-8 rounded-full ${isUser ? 'bg-blue-500' : 'bg-blue-100'} flex items-center justify-center">
+      <i class="fas fa-${isUser ? 'user' : 'building'} ${isUser ? 'text-white' : 'text-blue-500'}"></i>
+    </div>
+    <div class="max-w-[80%]">
+      <div class="${isUser ? 'bg-blue-500 text-white' : 'bg-gray-100'} rounded-lg p-3">
+        <p>${text}</p>
+      </div>
+      <span class="text-xs text-gray-500 mt-1">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+    </div>
+  `;
+  return div;
+}
+</script>
+</body></html>
